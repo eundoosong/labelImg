@@ -608,6 +608,7 @@ class Canvas(QWidget):
 
     def keyPressEvent(self, ev):
         key = ev.key()
+        mod = ev.modifiers()
         if key == Qt.Key_Escape and self.current:
             print('ESC press')
             self.current = None
@@ -623,33 +624,60 @@ class Canvas(QWidget):
             self.moveOnePixel('Up')
         elif key == Qt.Key_Down and self.selectedShape:
             self.moveOnePixel('Down')
+        elif key == Qt.Key_J and self.selectedShape:
+            self.moveOnePixel('ScaleDownRight') if mod & Qt.ShiftModifier \
+                else self.moveOnePixel('ScaleUpLeft')
+        elif key == Qt.Key_L and self.selectedShape:
+            self.moveOnePixel('ScaleUpRight') if mod & Qt.ShiftModifier \
+                else self.moveOnePixel('ScaleDownLeft')
+        elif key == Qt.Key_I and self.selectedShape:
+            self.moveOnePixel('ScaleDownBottom') if mod & Qt.ShiftModifier \
+                else self.moveOnePixel('ScaleUpTop')
+        elif key == Qt.Key_K and self.selectedShape:
+            self.moveOnePixel('ScaleUpBottom') if mod & Qt.ShiftModifier \
+                else self.moveOnePixel('ScaleDownTop')
+
+    def updateSelectedShapePoints(self, x, y):
+        for idx in range(4):
+            self.selectedShape.points[idx] += QPointF(x[idx], y[idx])
 
     def moveOnePixel(self, direction):
-        # print(self.selectedShape.points)
         if direction == 'Left' and not self.moveOutOfBound(QPointF(-1.0, 0)):
             # print("move Left one pixel")
-            self.selectedShape.points[0] += QPointF(-1.0, 0)
-            self.selectedShape.points[1] += QPointF(-1.0, 0)
-            self.selectedShape.points[2] += QPointF(-1.0, 0)
-            self.selectedShape.points[3] += QPointF(-1.0, 0)
+            self.updateSelectedShapePoints([-1.0]*4, [0]*4)
         elif direction == 'Right' and not self.moveOutOfBound(QPointF(1.0, 0)):
             # print("move Right one pixel")
-            self.selectedShape.points[0] += QPointF(1.0, 0)
-            self.selectedShape.points[1] += QPointF(1.0, 0)
-            self.selectedShape.points[2] += QPointF(1.0, 0)
-            self.selectedShape.points[3] += QPointF(1.0, 0)
+            self.updateSelectedShapePoints([1.0]*4, [0]*4)
         elif direction == 'Up' and not self.moveOutOfBound(QPointF(0, -1.0)):
             # print("move Up one pixel")
-            self.selectedShape.points[0] += QPointF(0, -1.0)
-            self.selectedShape.points[1] += QPointF(0, -1.0)
-            self.selectedShape.points[2] += QPointF(0, -1.0)
-            self.selectedShape.points[3] += QPointF(0, -1.0)
+            self.updateSelectedShapePoints([0]*4, [-1.0]*4)
         elif direction == 'Down' and not self.moveOutOfBound(QPointF(0, 1.0)):
             # print("move Down one pixel")
-            self.selectedShape.points[0] += QPointF(0, 1.0)
-            self.selectedShape.points[1] += QPointF(0, 1.0)
-            self.selectedShape.points[2] += QPointF(0, 1.0)
-            self.selectedShape.points[3] += QPointF(0, 1.0)
+            self.updateSelectedShapePoints([0]*4, [1.0]*4)
+        elif direction == 'ScaleUpLeft' and not self.moveOutOfBound(QPointF(-1.0, 0)):
+            print("scale up left")
+            self.updateSelectedShapePoints([-1.0, 0, 0, -1.0], [0]*4)
+        elif direction == 'ScaleDownLeft' and not self.moveOutOfBound(QPointF(1.0, 0)):
+            print("scale down left")
+            self.updateSelectedShapePoints([1.0, 0, 0, 1.0], [0]*4)
+        elif direction == 'ScaleUpTop' and not self.moveOutOfBound(QPointF(0, -1.0)):
+            print("scale up top")
+            self.updateSelectedShapePoints([0]*4, [-1.0, -1.0, 0, 0])
+        elif direction == 'ScaleDownTop' and not self.moveOutOfBound(QPointF(0, 1.0)):
+            print("scale down top")
+            self.updateSelectedShapePoints([0]*4, [1.0, 1.0, 0, 0])
+        elif direction == 'ScaleUpRight' and not self.moveOutOfBound(QPointF(1.0, 0)):
+            print("scale up right")
+            self.updateSelectedShapePoints([0, 1.0, 1.0, 0], [0]*4)
+        elif direction == 'ScaleDownRight' and not self.moveOutOfBound(QPointF(-1.0, 0)):
+            print("scale down right")
+            self.updateSelectedShapePoints([0, -1.0, -1.0, 0], [0]*4)
+        elif direction == 'ScaleUpBottom' and not self.moveOutOfBound(QPointF(0, 1.0)):
+            print("scale up bottom")
+            self.updateSelectedShapePoints([0]*4, [0, 0, 1.0, 1.0])
+        elif direction == 'ScaleDownBottom' and not self.moveOutOfBound(QPointF(0, -1.0)):
+            print("scale down bottom")
+            self.updateSelectedShapePoints([0]*4, [0, 0, -1.0, -1.0])
         self.shapeMoved.emit()
         self.repaint()
 
