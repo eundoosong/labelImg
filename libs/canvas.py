@@ -38,6 +38,7 @@ class Canvas(QWidget):
         # Initialise local state.
         self.mode = self.EDIT
         self.shapes = []
+        self.curShapeIdx = 0
         self.current = None
         self.selectedShape = None  # save the selected shape here
         self.selectedShapeCopy = None
@@ -300,6 +301,12 @@ class Canvas(QWidget):
         self.deSelectShape()
         shape.selected = True
         self.selectedShape = shape
+        # This for statement is an inefficient way to find out cur shape index
+        # But it seems no better way for now because of selectShapePoint
+        for idx in range(len(self.shapes)):
+            if self.shapes[idx] is shape:
+                self.curShapeIdx = idx
+                break
         self.setHiding()
         self.selectionChanged.emit(True)
         self.update()
@@ -636,6 +643,14 @@ class Canvas(QWidget):
         elif key == Qt.Key_K and self.selectedShape:
             self.moveOnePixel('ScaleUpBottom') if mod & Qt.ShiftModifier \
                 else self.moveOnePixel('ScaleDownTop')
+        elif (key == Qt.Key_Q or key == Qt.Key_E) and self.selectedShape:
+            self.selectShapeFromKey(key)
+
+    def selectShapeFromKey(self, key):
+        self.curShapeIdx += (1 if key == Qt.Key_Q else -1)
+        self.curShapeIdx %= len(self.shapes)
+        shape = self.shapes[self.curShapeIdx]
+        self.selectShape(shape)
 
     def updateSelectedShapePoints(self, x, y):
         for idx in range(4):
