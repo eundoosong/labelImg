@@ -643,12 +643,15 @@ class Canvas(QWidget):
         elif key == Qt.Key_K and self.selectedShape:
             self.moveOnePixel('ScaleUpBottom') if mod & Qt.ShiftModifier \
                 else self.moveOnePixel('ScaleDownTop')
-        elif (key == Qt.Key_Q or key == Qt.Key_E) and self.selectedShape:
+        elif (key == Qt.Key_Q or key == Qt.Key_E) and len(self.shapes) > 0:
             self.selectShapeFromKey(key)
 
     def selectShapeFromKey(self, key):
-        self.curShapeIdx += (1 if key == Qt.Key_Q else -1)
-        self.curShapeIdx %= len(self.shapes)
+        if self.selectedShape:
+            self.curShapeIdx += (1 if key == Qt.Key_Q else -1)
+            self.curShapeIdx %= len(self.shapes)
+        else:
+            self.curShapeIdx = 0
         shape = self.shapes[self.curShapeIdx]
         self.selectShape(shape)
 
